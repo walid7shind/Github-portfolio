@@ -7,11 +7,33 @@ import { ContactIllustration } from "./Illustrations";
 
 export default function ContactSection() {
   const { t } = useLanguage();
-  // Replace "YOUR_FORMSPREE_ID" with your actual Formspree form ID
-  // 1. Go to https://formspree.io/
-  // 2. Create a new form
-  // 3. Copy the form ID (e.g., "xzyqjklm") and paste it below
-  const [state, handleSubmit] = useForm(process.env.NEXT_PUBLIC_FORMSPREE_ID || "");
+  const formId = process.env.NEXT_PUBLIC_FORMSPREE_ID?.trim();
+
+  if (!formId) {
+    return (
+      <section id="contact" className="py-20 bg-secondary/10 scroll-mt-20">
+        <div className="container mx-auto px-4 md:px-6 text-center space-y-6">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl"
+          >
+            {t.contact.title}
+          </motion.h2>
+          <div className="max-w-2xl mx-auto p-6 bg-background rounded-xl border shadow-sm">
+            <p className="text-lg font-semibold text-yellow-600">
+              Please set NEXT_PUBLIC_FORMSPREE_ID to enable the contact form.
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Create a Formspree form, copy its ID, and add it to your environment variables before building.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const [state, handleSubmit] = useForm(formId);
 
   if (state.succeeded) {
     return (
