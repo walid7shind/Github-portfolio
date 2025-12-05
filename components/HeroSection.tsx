@@ -8,7 +8,7 @@ import { useLanguage } from "@/context/LanguageContext";
 
 export default function HeroSection() {
   const { t } = useLanguage();
-  const basePath = process.env.NODE_ENV === 'production' ? '/github-portfolio' : '';
+  const basePath = process.env.NODE_ENV === 'production' ? '/Github-portfolio' : '';
 
   return (
     <section
@@ -46,7 +46,7 @@ export default function HeroSection() {
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
           <a
-            href={`${basePath}/resume walid.pdf`}
+            href={`${basePath}/resume_walid.pdf`}
             download
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-8 py-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
