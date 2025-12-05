@@ -74,7 +74,7 @@ export const content = {
       ...commonInfo,
       name: "Walid BENMAAROUF",
       profileSummary:
-        "Future IT Engineer from Télécom Saint-Étienne, seeking my first Full Stack or Back-end Developer role. My experience in apprenticeships and internships at Groupe Casino has given me concrete skills in web development, cloud, and project management.",
+        "Aspiring AI & Software Engineer from Télécom Saint-Étienne, specializing in artificial intelligence, computer vision, and software development. My personal projects, academic background, and professional experiences have equipped me with strong, concrete skills in GenAI, vision systems, and modern software engineering.",
     },
     nav: {
       home: "Home",
@@ -111,11 +111,12 @@ export const content = {
       title: "My Technical Skills",
       categories: {
         languages: "Languages",
-        frontend: "Frontend Development",
-        backend: "Backend Development",
+
         aiMl: "AI & Machine Learning",
         dataCloud: "Data & Cloud",
         devopsTools: "DevOps & Tools",
+        frontend: "Frontend Development",
+        backend: "Backend Development",
         other: "Other Skills",
       },
       list: skillsList,
