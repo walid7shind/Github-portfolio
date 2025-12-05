@@ -46,7 +46,7 @@ export default function HeroSection() {
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
           <a
-            href={`${basePath}/CV_AYMANE_ASSERRAR.pdf`}
+            href={`${basePath}/resume walid.pdf`}
             download
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-8 py-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
@@ -65,7 +65,7 @@ export default function HeroSection() {
         <div className="relative w-[280px] h-[280px] sm:w-[350px] sm:h-[350px] md:w-[450px] md:h-[450px]">
           <Image
             src={`${basePath}/profile.png`}
-            alt="Aymane Asserrar"
+            alt="Walid BENMAAROUF"
             fill
             className="object-contain drop-shadow-2xl"
             priority

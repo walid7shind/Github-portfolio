@@ -1,6 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/context/LanguageContext";
+import { personalInfo } from "@/lib/data";
 import { useForm, ValidationError } from "@formspree/react";
 import { motion } from "framer-motion";
 import { ContactIllustration } from "./Illustrations";
@@ -20,12 +21,28 @@ export default function ContactSection() {
           >
             {t.contact.title}
           </motion.h2>
-          <div className="max-w-2xl mx-auto p-6 bg-background rounded-xl border shadow-sm">
+          <div className="max-w-2xl mx-auto p-6 bg-background rounded-xl border shadow-sm space-y-3">
             <p className="text-lg font-semibold text-yellow-600">
-              Please set NEXT_PUBLIC_FORMSPREE_ID to enable the contact form.
+              Contact form temporarily unavailable.
             </p>
-            <p className="text-sm text-muted-foreground mt-2">
-              Create a Formspree form, copy its ID, and add it to your environment variables before building.
+            <p className="text-muted-foreground">
+              Please email me at{" "}
+              <a
+                href={`mailto:${personalInfo.email}`}
+                className="text-primary underline"
+              >
+                {personalInfo.email}
+              </a>{" "}
+              or reach out via{" "}
+              <a
+                href={personalInfo.linkedin}
+                target="_blank"
+                rel="noreferrer"
+                className="text-primary underline"
+              >
+                LinkedIn
+              </a>
+              .
             </p>
           </div>
         </div>
