@@ -276,32 +276,32 @@ export const content = {
           description:
             "PaperMind est une plateforme RAG full-stack qui transforme les PDFs en connaissances consultables",
           tech: ["Python", "FastApi", "Qdrant", "OpenAi", "React"],
-          github: "https://github.com/walid7shind",
+          github: "https://github.com/walid7shind/PaperMind-Portfolio",
         },
         {
           title: "Estimation d'âge",
           description: "Estimation d'âge à partir d'images faciales en utilisant des techniques traditionnelles de vision par ordinateur",
           tech: ["Python", "Matlab", "OpenCV", "vision"],
-          github: "https://github.com/walid7shind",
+          github: "https://github.com/walid7shind/estimation-d-age",
         },
         {
           title: "Jeu AR Hockey",
           description:
             "Un jeu de hockey en RA 1v1 développé par une équipe de 4 étudiants dans le cadre d'un projet de traitement d'images",
           tech: ["Java", "Maven", "OpenCV"],
-          github: "https://github.com/walid7shind",
+          github: "https://github.com/walid7shind/hockeyAr",
         },
         {
           title: "Mimestis",
           description: "Chatbot qui digère les documents internes d'entreprise et répond aux questions des employés",
           tech: ["Python", "FastApi", "Sqlite", "Azure pipelines", "React", "ollama Mistral"],
-          github: "https://github.com/walid7shind",
+          github: "https://github.com/walid7shind/mimestis",
         },
         {
           title: "Slice Defender",
           description: "Jeu 3D interactif avec mécanique de découpe de projectiles.",
           tech: ["C++", "OpenGL", "Qt"],
-          github: "https://github.com/walid7shind",
+          github: "https://github.com/walid7shind/Slice-Defender",
         },
       ],
     },
