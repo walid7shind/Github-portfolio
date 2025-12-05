@@ -7,31 +7,6 @@ const commonInfo = {
 };
 
 const skillsList = {
-  languages: [
-    "Python",
-    "TypeScript",
-    "JavaScript",
-    "C/C++",
-    "Java",
-    "SQL",
-    "Bash",
-  ],
-  frontend: [
-    "React",
-    "Next.js",
-    "Tailwind CSS",
-    "HTML5",
-    "CSS3",
-    "Streamlit",
-  ],
-  backend: [
-    "FastAPI",
-    "Flask",
-    "Node.js",
-    "REST APIs",
-    "Spring Boot",
-    "Microservices",
-  ],
   aiMl: [
     "LangChain",
     "OpenAI API",
@@ -65,6 +40,31 @@ const skillsList = {
     "Unit Testing",
     "Agile/Scrum",
     "System Design",
+  ],
+    languages: [
+    "Python",
+    "TypeScript",
+    "JavaScript",
+    "C/C++",
+    "Java",
+    "SQL",
+    "Bash",
+  ],
+  frontend: [
+    "React",
+    "Next.js",
+    "Tailwind CSS",
+    "HTML5",
+    "CSS3",
+    "Streamlit",
+  ],
+  backend: [
+    "FastAPI",
+    "Flask",
+    "Node.js",
+    "REST APIs",
+    "Spring Boot",
+    "Microservices",
   ],
 };
 
@@ -202,7 +202,7 @@ export const content = {
       ...commonInfo,
       name: "Walid BENMAAROUF",
       profileSummary:
-        "Futur Ingénieur IT de Télécom Saint-Étienne, à la recherche de mon premier poste de Développeur Full Stack ou Back-end. Mon expérience en alternance et stages chez Groupe Casino m'a permis d'acquérir des compétences concrètes en développement web, cloud et gestion de projet.",
+        "Futur Ingénieur IA & Logiciel de Télécom Saint-Étienne, spécialisé en intelligence artificielle, vision par ordinateur et développement logiciel. Mes projets personnels, mon parcours académique et mes expériences professionnelles m'ont permis d'acquérir des compétences solides et concrètes en GenAI, systèmes de vision et ingénierie logicielle moderne.",
     },
     nav: {
       home: "Accueil",
@@ -239,11 +239,11 @@ export const content = {
       title: "Mes Compétences Techniques",
       categories: {
         languages: "Langages",
-        frontend: "Développement Frontend",
-        backend: "Développement Backend",
         aiMl: "IA & Machine Learning",
         dataCloud: "Data & Cloud",
         devopsTools: "DevOps & Outils",
+        frontend: "Développement Frontend",
+        backend: "Développement Backend",
         other: "Autres Compétences",
       },
       list: skillsList,
