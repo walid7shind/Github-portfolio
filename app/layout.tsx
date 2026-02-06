@@ -20,8 +20,8 @@ const geistMono = Geist_Mono({
 
 // Metadata for the application
 export const metadata: Metadata = {
-  title: `${content.fr.personalInfo.name} - Portfolio`,
-  description: content.fr.personalInfo.profileSummary,
+  title: `${content.en.personalInfo.name} - Portfolio`,
+  description: content.en.personalInfo.profileSummary,
 };
 
 export default function RootLayout({
@@ -30,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >

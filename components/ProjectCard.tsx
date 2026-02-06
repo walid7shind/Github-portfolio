@@ -1,15 +1,17 @@
 import Link from "next/link";
-import { Github } from "lucide-react";
+import { ArrowUpRight, Github } from "lucide-react";
 
 interface ProjectCardProps {
+  slug: string;
   title: string;
   description: string;
   tech: string[];
   github: string;
   viewOnGithubLabel?: string;
+  viewDetailsLabel?: string;
 }
 
-export default function ProjectCard({ title, description, tech, github, viewOnGithubLabel = "View on GitHub" }: ProjectCardProps) {
+export default function ProjectCard({ slug, title, description, tech, github, viewOnGithubLabel = "View on GitHub", viewDetailsLabel = "View details" }: ProjectCardProps) {
   return (
     <div className="group flex flex-col justify-between rounded-lg border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md">
       <div className="p-6 space-y-4">
@@ -17,15 +19,24 @@ export default function ProjectCard({ title, description, tech, github, viewOnGi
           <h3 className="text-2xl font-semibold leading-none tracking-tight group-hover:text-primary transition-colors">
             {title}
           </h3>
-          <Link
-            href={github}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Github className="h-5 w-5" />
-            <span className="sr-only">{viewOnGithubLabel}</span>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/projects/${slug}`}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowUpRight className="h-5 w-5" />
+              <span className="sr-only">{viewDetailsLabel}</span>
+            </Link>
+            <Link
+              href={github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Github className="h-5 w-5" />
+              <span className="sr-only">{viewOnGithubLabel}</span>
+            </Link>
+          </div>
         </div>
         <p className="text-muted-foreground">{description}</p>
       </div>

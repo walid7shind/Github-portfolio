@@ -42,7 +42,7 @@ export default function ProjectsSection() {
           viewport={{ once: true }}
           className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto"
         >
-          {t.projects.list.map((project, index) => (
+          {t.projects.tabs.map((project, index) => (
             <motion.div key={index} variants={item} className="h-full">
               <ProjectCard {...project} viewOnGithubLabel={t.projects.viewOnGithub} />
             </motion.div>

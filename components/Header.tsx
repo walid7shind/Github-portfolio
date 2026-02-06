@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Github, Linkedin, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
-import LanguageSwitcher from "./LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function Header() {
@@ -54,7 +53,6 @@ export default function Header() {
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <LanguageSwitcher />
           <Link
             href={t.personalInfo.github}
             target="_blank"
@@ -78,7 +76,6 @@ export default function Header() {
 
         {/* Mobile Menu Button */}
         <div className="flex md:hidden items-center gap-4">
-          <LanguageSwitcher />
           <ThemeToggle />
           <button
             className="p-2"
