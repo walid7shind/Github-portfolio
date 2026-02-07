@@ -7,6 +7,7 @@ import { ArrowLeft, ExternalLink, Github } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import type { ProjectPageItem } from "@/lib/data";
 import { getProjectPageBySlug } from "@/lib/data";
+import { withBasePath } from "@/lib/withBasePath";
 import ProjectTabs, { type ProjectTab } from "@/components/projects/ProjectTabs";
 
 type TechItem = {
@@ -144,7 +145,7 @@ export default function ProjectPageClient({ slug }: { slug: string }) {
           {project.heroVideo ? (
             <video
               className="h-full w-full object-cover opacity-40"
-              src={project.heroVideo}
+              src={withBasePath(project.heroVideo)}
               autoPlay
               muted
               loop
@@ -294,7 +295,7 @@ export default function ProjectPageClient({ slug }: { slug: string }) {
                     <div className="overflow-hidden rounded-2xl border bg-background/50">
                       <video
                         className="w-full h-auto"
-                        src={project.demoVideo ?? project.heroVideo}
+                        src={withBasePath(project.demoVideo ?? project.heroVideo)}
                         controls
                         playsInline
                       />
@@ -321,7 +322,7 @@ export default function ProjectPageClient({ slug }: { slug: string }) {
                     {src ? (
                       // Intentionally not using next/image until you add real local assets.
                       // You can switch to <Image /> once you put images in /public.
-                      <img src={src} alt={`${project.title} screenshot ${idx + 1}`} className="h-full w-full object-cover" />
+                      <img src={withBasePath(src)} alt={`${project.title} screenshot ${idx + 1}`} className="h-full w-full object-cover" />
                     ) : (
                       <div className="h-full w-full bg-gradient-to-br from-muted to-background flex items-center justify-center">
                         <div className="text-center px-6">
