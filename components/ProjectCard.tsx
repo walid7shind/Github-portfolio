@@ -21,7 +21,7 @@ export default function ProjectCard({ slug, title, description, tech, github, vi
           </h3>
           <div className="flex items-center gap-3">
             <Link
-              href={`/projects/${slug}`}
+              href={`/projects/${slug}/`}
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowUpRight className="h-5 w-5" />
