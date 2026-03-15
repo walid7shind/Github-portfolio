@@ -338,6 +338,8 @@ techStack: {
           overview: `
 **PaperMind** is an intelligent application that lets users chat with their PDF documents.
 
+**Live demo:** [papermind-frontend.onrender.com](https://papermind-frontend.onrender.com/)
+
 Instead of manually reading long research papers or technical documents, users can:
 
 - upload one or multiple PDFs,
@@ -368,6 +370,7 @@ Qdrant Vector Database + OpenAI Models
 \`\`\`
           `,
           punchline: "Chat with your PDFs using grounded RAG.",
+          demoUrl: "https://papermind-frontend.onrender.com/",
           techStack: {
             frontend: [
               "React (Hooks, Context) - dynamic, stateful chat UI",
