@@ -170,6 +170,14 @@ export const content = {
       viewOnGithub: "View on GitHub",
       tabs: [
         {
+          slug: "aerokpi-forge",
+          title: "AeroKpi Forge",
+          description:
+            "AI-powered system for KPI extraction from airlines financial reports.",
+          tech: ["RAG", "LLM", "PDF"],
+          github: "https://github.com/walid7shind/AeroKpi-Forge",
+        },
+        {
           slug: "lanesight",
           title: "LaneSight",
           description: "AI-powered lane perception for real-world driving scenes.",
@@ -218,6 +226,33 @@ export const content = {
       
       ] satisfies ProjectTabItem[],
       pages: [
+        {
+          slug: "aerokpi-forge",
+          title: "AeroKpi Forge",
+          description:
+            "AI-powered system for KPI extraction from airlines financial reports.",
+          overview: `
+**AeroKpi Forge** is an **AI-powered pipeline** that extracts and computes key performance indicators (KPIs) from **airlines financial reports**.
+
+It focuses on turning long, unstructured documents (PDF reports) into structured KPI outputs through an end-to-end workflow: ingestion → extraction → validation/scoring → computation → export.
+
+You can find the repository here: [GitHub](https://github.com/walid7shind/AeroKpi-Forge)
+
+Paper / write-up: [Hybrid symbolic-semantic multimodal RAG paper](/project%20assets/AeroKpi%20Forge/paper/Hybrid%20symbolic-semantic%20multimodal%20RAG%20paper.pdf)
+          `,
+          punchline:
+            "AI-powered KPI extraction from airlines financial reports.",
+          techStack: ["Python", "RAG", "LLM", "PDF parsing"],
+          github: "https://github.com/walid7shind/AeroKpi-Forge",
+          gallery: [
+            "/project%20assets/AeroKpi%20Forge/data_architecture/simplified_architecture.png",
+            "/project%20assets/AeroKpi%20Forge/diagrams/0-global_pipeline.png",
+            "/project%20assets/AeroKpi%20Forge/diagrams/1-ingestion%20+%20metadata.png",
+            "/project%20assets/AeroKpi%20Forge/diagrams/2-algorithmique%20chunks%20filtering%20and%20scoring.png",
+            "/project%20assets/AeroKpi%20Forge/diagrams/3-computation%20engine.png",
+            "/project%20assets/AeroKpi%20Forge/diagrams/4-output.png",
+          ],
+        },
         {
           slug: "lanesight",
           title: "LaneSight",
@@ -338,7 +373,7 @@ techStack: {
           overview: `
 **PaperMind** is an intelligent application that lets users chat with their PDF documents.
 
-**Live demo:** [papermind-frontend.onrender.com](https://papermind-frontend.onrender.com/)
+**Live demo:** [papermind-frontend.onrender.com](https://papermind-frontend.onrender.com)
 
 Instead of manually reading long research papers or technical documents, users can:
 

@@ -122,6 +122,13 @@ export default function ProjectPageClient({ slug }: { slug: string }) {
     []
   );
 
+  const techGroups = useMemo(
+    () => normalizeTechStack(project?.techStack),
+    [project?.techStack]
+  );
+  const techItems = useMemo(() => techGroups.flatMap((g) => g.items), [techGroups]);
+  const techCount = techItems.length;
+
   if (!project) {
     return (
       <div className="container mx-auto px-4 md:px-6 py-16">
@@ -132,10 +139,6 @@ export default function ProjectPageClient({ slug }: { slug: string }) {
       </div>
     );
   }
-
-  const techGroups = useMemo(() => normalizeTechStack(project.techStack), [project.techStack]);
-  const techItems = useMemo(() => techGroups.flatMap((g) => g.items), [techGroups]);
-  const techCount = techItems.length;
 
   return (
     <div>
@@ -223,7 +226,7 @@ export default function ProjectPageClient({ slug }: { slug: string }) {
                       strong: ({ children }) => <strong className="text-foreground font-semibold">{children}</strong>,
                       a: ({ children, href }) => (
                         <a
-                          href={href}
+                          href={withBasePath(href) ?? href}
                           className="underline underline-offset-4"
                           target="_blank"
                           rel="noopener noreferrer"
