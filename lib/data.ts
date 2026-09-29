@@ -43,6 +43,12 @@ const skillsList = {
   ],
   dataCloud: [
     "AWS (Bedrock, SageMaker, S3)",
+    "Apache Spark",
+    "Scala",
+    "Amazon Deequ",
+    "AWS EMR",
+    "Amazon SQS",
+    "Redis",
     "Azure (IoT Hub, Pipelines)",
     "Qdrant",
     "PostgreSQL",
@@ -153,7 +159,14 @@ export const content = {
           role: "Apprentice GenAi Engineer",
           dates: "Sept 2025 - Present",
           description:
-            "Genai end to end project from architecture to deployment, tool maintenance, process automation, and new AI tools development.",
+            "Built a production GenAI document-intelligence pipeline on AWS Bedrock and SageMaker to extract structured financial KPIs from complex airline reports using hybrid RAG and multi-agent extraction and validation workflows. Implemented asynchronous processing with SQS and Redis-based rate limiting, improving field-level extraction accuracy from approximately 87% to over 99% and reducing extraction costs by 27K. Developed a data engineering and quality framework with Apache Spark, Scala, Amazon Deequ, and AWS EMR to compute quality metrics and validate large-scale datasets stored in S3. Integrated configurable data-quality checks into Jenkins CI/CD and added monitoring for pipeline latency, throughput, failures, LLM usage, and processing costs.",
+        },
+        {
+          company: "Edumotiv Lyon",
+          role: "AI Engineer, Internship",
+          dates: "Apr 2025 - Jul 2025",
+          description:
+            "Contributed within a 4-person engineering team to design and develop an enterprise multi-agent GenAI platform connecting SharePoint, emails, lakehouse data, and multimodal content including PDFs, presentations, audio, and video. Built ingestion and retrieval pipelines combining RAG and embeddings for indexed knowledge with MCP-based tools for dynamic data access, enabling agents to generate contextualized educational content. Productionized the platform with Python, LangChain, React, Azure, Docker, Kubernetes, and CI/CD, automating manual content-generation workflows and saving hours of work while reducing staffing needs.",
         },
         {
           company: "DEF-Systems",
