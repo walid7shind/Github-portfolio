@@ -185,7 +185,7 @@ export default function ProjectPageClient({ slug }: { slug: string }) {
               </Link>
 
               <div className="mt-8 inline-flex items-center rounded-full border bg-background/60 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-foreground/70">
-                AI engineering case study
+                AI engineering case study • Amadeus • full ownership
               </div>
 
               <h1 className="mt-6 text-4xl md:text-6xl font-semibold tracking-tight">
@@ -193,7 +193,7 @@ export default function ProjectPageClient({ slug }: { slug: string }) {
               </h1>
 
               <p className="mt-5 max-w-3xl text-lg md:text-xl text-muted-foreground">
-                AeroKpi Forge turns heterogeneous airline financial PDFs into structured KPI data with a workflow designed for document understanding, dependency-aware reconstruction, and operational traceability.
+                Developed at Amadeus, AeroKpi Forge turns heterogeneous airline financial PDFs into structured KPI data with a workflow designed for document understanding, dependency-aware reconstruction, and operational traceability.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-2">
@@ -493,7 +493,7 @@ export default function ProjectPageClient({ slug }: { slug: string }) {
       <div className="bg-[#071a33] text-white">
         <div className="mx-auto max-w-7xl px-4 py-12 md:px-8 lg:px-10">
           <div className="mb-10 flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.2em] text-cyan-300/90">
-            <span>10 — Data Quality</span>
+            <span>10 — Data Quality • Amadeus</span>
           </div>
 
           <h1 className="text-4xl font-semibold tracking-tight md:text-7xl">
@@ -503,7 +503,7 @@ export default function ProjectPageClient({ slug }: { slug: string }) {
           </h1>
 
           <p className="mt-7 max-w-6xl text-lg leading-relaxed text-slate-300 md:text-2xl">
-            Almatar delivers booking benchmark fares to S3 periodically. The campaign integrates that dataset into the team&apos;s existing Data Quality framework, which verifies automatically that incoming data is complete, consistent and usable.
+            Developed at Amadeus within the Data Engineering team, this Almatar data-quality pipeline validates the periodic booking benchmark feed delivered to S3 and ensures the dataset remains complete, consistent, and operationally usable.
           </p>
 
           <div className="mt-10 overflow-hidden rounded-xl border border-cyan-400/40 bg-[#050d1e] shadow-[0_0_0_1px_rgba(34,211,238,0.08)]">

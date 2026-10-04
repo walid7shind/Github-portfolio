@@ -186,7 +186,7 @@ export const content = {
           slug: "aerokpi-forge",
           title: "AeroKpi Forge",
           description:
-            "AI-powered system for KPI extraction from airlines financial reports.",
+            "Amadeus-owned AI system for KPI extraction from airline financial reports.",
           tech: ["RAG", "LLM", "PDF"],
           github: "https://github.com/walid7shind/AeroKpi-Forge",
         },
@@ -194,7 +194,7 @@ export const content = {
           slug: "data-quality",
           title: "Data Quality",
           description:
-            "Amadeus data-quality pipeline for the AlMatar dataset and delivery reliability.",
+            "Amadeus Data Engineering data-quality pipeline for the AlMatar dataset and delivery reliability.",
           tech: ["Spark", "Scala", "Deequ", "S3"],
           github: "https://github.com/walid7shind",
         },
