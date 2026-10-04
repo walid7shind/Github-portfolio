@@ -1,0 +1,248 @@
+--- PAGE 1 ---\n\n\n--- PAGE 2 ---\n\n\n--- PAGE 3 ---\nL’intelligence documentaire en action
+Table des matières
+Remerciements 4
+Glossaire des termes techniques 5
+1 Contexte du travail 6
+1.1 Présentation de l’entreprise . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+1.2 Engagement RSDD . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+1.2.1 Questionnement : développement durable et systèmes numériques . . . . . . . . . . 6
+1.3 Positionnement dans la structure . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+1.4 Contexte, position et problématique . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+1.5 Objectifs de l’alternance . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+2 Analyse du travail réalisé 8
+2.1 Présentation générale des missions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+2.2 Planning général . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+2.3 Spécifications du système . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+2.4 Conception du système d’intelligence documentaire . . . . . . . . . . . . . . . . . . . . . . 12
+2.4.1 Ingestion et compréhension multimodales . . . . . . . . . . . . . . . . . . . . . . . 12
+2.4.2 Partitionnement initial par compagnie et période . . . . . . . . . . . . . . . . . . . 13
+2.5 Retrieval hybride . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+2.5.1 Représentation symbolique par vecteur signé . . . . . . . . . . . . . . . . . . . . . 15
+2.5.2 Catégorisation et classement des fragments . . . . . . . . . . . . . . . . . . . . . . 17
+2.6 Extraction structurée et reconstruction des KPI . . . . . . . . . . . . . . . . . . . . . . . . 18
+2.6.1 Graphe de dépendances et construction du contexte de résolution . . . . . . . . . . 19
+2.6.2 Agent de résolution et orchestration itérative des outils . . . . . . . . . . . . . . . . 19
+2.7 Validation et mécanismes de \n\n--- PAGE 4 ---\nL’intelligence documentaire en action
+5 Projet professionnel 28
+Conclusion générale 29
+6 Bibliographie 30
+A Annexes 31
+A Visualisation des impacts– Diagrammes Butterfly 31
+B Pipeline d’ingestion et de préparation des données 32
+C Système de retrieval hybride symbolique-sémantique 34
+D Génération structurée et reconstruction des KPI 36
+E Exemples d’exécution et métriques techniques 37
+E.1 Exemple d’exécution du retrieval et du solver . . . . . . . . . . . . . . . . . . . . . . . . . 38
+E.2 Suivi du coût et de la consommation des modèles . . . . . . . . . . . . . . . . . . . . . . . 38
+Walid Benmaarouf2026 3\n\n--- PAGE 5 ---\nL’intelligence documentaire en action
+Remerciements
+Cette année d’alternance a représenté une étape particulièrement importante de mon parcours. Elle m’a
+permis de confronter mes connaissances académiques à des problématiques industrielles concrètes, de
+gagner en autonomie et surtout de faire évoluer ma manière d’aborder un problème d’ingénierie.
+Je souhaite tout d’abord remercier l’ensemble des équipes d’Amadeus qui m’ont accueilli et accompagné
+tout au long de cette expérience. J’ai eu la chance d’évoluer dans un environnement à la fois exigeant,
+bienveillant et très agréable au quotidien. La disponibilité des membres de l’équipe, leur simplicité dans
+les échanges et leur volonté de partager leurs connaissances ont largement facilité mon intégration et
+rendu cette année particulièrement enrichissante.
+Je remercie également toutes les personnes avec lesquelles j’ai pu échanger autour du projet, notamment
+les équipes techniques, les Product Owners et les différentes parties prenantes. Ces discussions m’ont
+permis de mieux comprendre les enjeux métier, les contraintes de l’écosystème Amadeus et la manière
+dont une solution d’intelligence artificielle doit s’intégrer dans un environnement industriel plus large.
+Je tiens à adresser un remerciement particulier à M. Abdessamad Bakhada, mon tuteur chez Amadeus,
+pour sa confiance, sa disponibilité et la qualité de son accompagnement. Nos échanges réguliers m’ont
+souvent poussé à dépasser une approche uniquement fondée sur les connaissances que je possédais déjà, à
+explorer de nouvelles pistes et à remettre en question mes premières solutions. Cette liberté d’exploration,
+combinée à ses conseils et à sa proximité au quotidien, a beaucoup contribué à ma progression pendant
+cette alternance.
+Je souhaite également remercier Télécom Saint-Étienne et l’ensemble du corps enseignant pour les
+connaissances, la rigueur et les méthodes de travail transmises tout au long de ma formation. Je remercie
+tout particulièrement M. Olivier Al\n\n--- PAGE 6 ---\nL’intelligence documentaire en action
+Glossaire des termes techniques
+Terme Définition
+LLM Large Language Model. Modèle de langage de grande taille entraîné sur
+de grands corpus de données.
+VLM Vision-Language Model. Modèle capable de traiter conjointement des
+informations visuelles et textuelles.
+RAG Retrieval-Augmented Generation. Architecture combinant recherche d’in-
+formation et génération par modèle de langage.
+KPI Key Performance Indicator. Indicateur permettant de quantifier une
+performance ou une information métier.
+OCR Optical Character Recognition. Technique permettant d’extraire du texte
+à partir d’une représentation visuelle.
+Embedding Représentation vectorielle dense d’un contenu textuel ou multimodal dans
+un espace latent.
+Vector Database Base de données optimisée pour le stockage et la recherche de représenta-
+tions vectorielles.
+Metadata Informations décrivant le contenu ou le contexte d’un document, d’une
+page ou d’un fragment.
+Dependency Graph Graphe décrivant les dépendances entre KPI et variables nécessaires à
+leur reconstruction.
+CI/CD Continuous Integration / Continuous Deployment. Ensemble de pratiques
+permettant d’automatiser les tests, builds et déploiements.
+Observability Capacité à comprendre l’état interne d’un système à partir de logs,
+métriques et traces.
+Amazon S3 Service de stockage objet utilisé pour conserver les documents, artefacts
+et résultats.
+Prometheus Système de collecte et stockage de métriques temporelles.
+Grafana Plateforme de visualisation et d’analyse de métriques.
+Json JavaScript Object Notation. Format structuré utilisé pour représenter et
+échanger des données.
+CSV Comma-Separated Values. Format tabulaire utilisé pour stocker ou échan-
+ger des données.
+Chunk Fragment de document utilisé comme unité d’indexation et de retrieval.
+Token Unité élémentaire utilisée par les modèles de langage pour représenter et
+traiter du texte.
+Apache Spark Moteur distribué de traitement de données à grande échelle.
+PI Planning Planning I\n\n--- PAGE 7 ---\nL’intelligence documentaire en action
+1. Contexte du travail
+1.1 Présentation de l’entreprise
+Amadeus est un groupe technologique international spécialisé dans les solutions informatiques destinées
+au secteur du voyage. Son siège est situé à Madrid et le groupe est implanté dans de nombreux pays. En
+France, le site de Sophia Antipolis constitue l’un de ses principaux centres technologiques.
+L’entreprise développe des systèmes utilisés par différents acteurs du voyage : compagnies aériennes,
+aéroports, hôtels, agences de voyage et autres opérateurs du secteur. Ses activités mobilisent ainsi des profils
+variés : ingénieurs logiciels, Data Engineers, spécialistes cloud et infrastructure, experts en intelligence
+artificielle, Product Owners, équipes fonctionnelles et fonctions support.
+En 2025, Amadeus comptait environ 20600 collaborateurs et réalisait un chiffre d’affaires supérieur à 6,5
+milliards d’euros. Cette dimension internationale implique des infrastructures informatiques importantes
+et une forte activité de recherche, de développement et d’exploitation de systèmes numériques.
+1.2 Engagement RSDD
+La politique environnementale du groupe est notamment pilotée parLucas Bobes,Group Environmental
+Officer and Head of ESG Reporting. Il assure le suivi de la performance environnementale, le reporting
+ESG et l’amélioration de l’empreinte des opérations.
+La démarche d’Amadeus s’appuie sur plusieurs référentiels et engagements reconnus, notamment lePacte
+mondial des Nations unies, les standardsGRIainsi que des certifications telles queEN 50600et
+ISO/IEC 22237pour son principal Data Center. Certains sites disposent également de certifications
+environnementales commeLEED GoldouBREEAM.
+Au cours des dernières années, cette démarche s’est renforcée avec l’engagement auprès de laSBTien
+2022 et la validation d’objectifs climatiques visant notamment, d’ici 2030, une réduction de42%des
+émissions de Scope 1 et 2 et de25%du Scope 3 par rapport à 2022. À Sophia Antipolis, ces engagem\n\n--- PAGE 8 ---\nL’intelligence documentaire en action
+d’appels et du volume de données traitées réduit le coût du service. D’un point de vue environnemental,
+elle limite également les ressources de calcul mobilisées. Le suivi de la latence, du nombre de tokens et des
+ressources utilisées permet ainsi d’intégrer la consommation du système parmi les critères d’observabilité.
+Une limite demeure cependant : l’utilisation de modèles de grande taille repose sur des infrastructures
+externes dont l’empreinte exacte n’est pas toujours directement accessible au développeur. L’enjeu consiste
+donc moins à supprimer tout impact qu’à concevoir un système proportionné au besoin : utiliser les
+traitements les plus coûteux uniquement lorsqu’ils apportent une valeur réelle et privilégier des opérations
+déterministes plus simples lorsqu’elles sont suffisantes. Cette logique rejoint une démarche d’écoconception
+logicielle dans laquelle performance, coût et consommation de ressources sont considérés dès la conception
+du système.
+1.3 Positionnement dans la structure
+Mon alternance s’est déroulée au sein d’une équipe Data Engineering d’Amadeus, encadrée par Mireille
+Boyer. L’équipe regroupe différents profils, notamment des Data Engineers, Data Scientists, Software
+Developers et profils juniors. J’y occupais un poste d’apprenti spécialisé en intelligence artificielle générative.
+La Figure 1 présente mon positionnement au sein de l’équipe.
+Figure 1– Positionnement au sein de l’équipe Data Engineering
+Walid Benmaarouf2026 7\n\n--- PAGE 9 ---\nL’intelligence documentaire en action
+1.4 Contexte, position et problématique
+Problématique
+Comment concevoir et industrialiser, dans l’environnement Amadeus, un système
+capable de transformer automatiquement des rapports financiers hétérogènes en KPI
+fiables, structurés et traçables, y compris lorsque leur reconstruction nécessite plusieurs
+variables, tout en réduisant les délais, les coûts et la dépendance à un prestataire
+externe?
+Mon travail s’est situé à l’interface entre les besoins métier, la Data Engineering et l’intelligence artificielle.
+J’ai travaillé avec les membres de l’équipe, les responsables produit et les équipes techniques impliquées
+dans l’infrastructure et le déploiement.
+1.5 Objectifs de l’alternance
+Les objectifs du projet ont été regroupés autour de cinq axes :
+1. automatiser l’ingestion de rapports financiers hétérogènes;
+2. identifier et reconstruire les KPI à partir des informations disponibles;
+3. fiabiliser les résultats par des mécanismes de validation et de traçabilité;
+4. réduire les délais, les coûts et la dépendance au prestataire externe;
+5. industrialiser la solution afin de permettre son intégration et son exploitation dans l’écosystème
+Amadeus.
+Ces objectifs couvrent ainsi l’ensemble du passage d’un document financier non structuré vers une donnée
+métier validée et exploitable. Les choix d’architecture et leur mise en œuvre sont détaillés dans la section
+suivante.
+2. Analyse du travail réalisé
+2.1 Présentation générale des missions
+Mon alternance a progressivement évolué d’une phase de compréhension du besoin vers la conception puis
+l’industrialisation d’un système complet.
+Les principales missions réalisées peuvent être regroupées en six blocs :
+1. analyse du besoin et des documents financiers;
+2. conception de la chaîne d’ingestion multimodale;
+3. développement du système de retrieval;
+4. conception du moteur de reconstruction des KPI;
+5. validation et évaluation des résultats;
+6. industrialisation et monitoring.
+Walid Benmaar\n\n--- PAGE 10 ---\nL’intelligence documentaire en action
+Table 2– Synthèse des principales missions
+Mission Objectif Livrable principal
+Analyse documen-
+taire
+Comprendre les formats, KPI et sources Spécifications et modèle de données
+Ingestion multi-
+modale
+Transformer les PDF en représentation
+exploitable
+Pipeline Vision / métadonnées
+Retrieval Identifier les fragments utiles Retrieval hybride symbolique-
+sémantique
+Reconstruction Calculer les KPI manquants Dependency graph et moteur de calcul
+Validation Évaluer la cohérence Moteur de validation et métriques
+Industrialisation Rendre le système exploitable Pipeline asynchrone, CI/CD, observabi-
+lité
+2.2 Planning général
+Le projet s’est déroulé de manière incrémentale. Chaque phase a permis d’identifier de nouvelles limitations
+et d’enrichir progressivement l’architecture.
+Figure 2– Diagrammes de Gantt : Période école/entreprise (01/09/2025 au 14/02/2026)
+Walid Benmaarouf2026 9\n\n--- PAGE 11 ---\nL’intelligence documentaire en action
+Figure 3– Diagrammes de Gantt : Période entreprise à temps plein (17/02/2026 au 12/09/2026)
+2.3 Spécifications du système
+Le système couvre neuf KPI financiers et opérationnels, notésk1,...,k 9, relatifs aux revenus, au trafic, à
+la capacité et aux ratios associés :
+k1 :Passenger Revenue
+k2 :Total Operating Revenue
+k3 :RPK/RPM
+k4 :Total Revenue per RPK/RPM
+k5 :Passenger Revenue per RPK/RPM
+k6 :ASK/ASM
+k7 :Passenger Revenue per ASK/ASM
+k8 :Total Revenue per ASK/ASM
+k9 :Total Cost per ASK/ASM
+Chaque KPI est associé à une période :Q1,Q 2,Q 3,Q 4 désignent les quatre trimestres,H1,H 2 les deux
+semestres etAl’année complète.
+Selon le rapport et la période, un KPI peut être directement disponible ou reconstruit à partir de plusieurs
+variables. Les principales exigences de taux d’exactitude, de robustesse et de traçabilité sont synthétisées
+dans le tableau suivant.
+Walid Benmaarouf2026 10\n\n--- PAGE 12 ---\nL’intelligence documentaire en action
+Exigence Description Critère / mesure
+Exigences
+fonctionnelles
+Ingestion
+documentaire
+Traiter automatiquement des rapports PDF hétérogènes sans
+dépendre d’une structure fixe. PDF→données
+Analyse multimodale Exploiter conjointement le texte, les tableaux, les graphiques et
+la structure visuelle. Texte + Vision
+Structuration Produire des métadonnées et des résultats conformes à un
+schéma structuré. JSON validé
+Retrieval Identifier les fragments pertinents et rechercher les informations
+complémentaires nécessaires. Top-kpertinent
+Reconstruction Identifier les KPI explicites, calculables ou manquants et
+reconstruire ceux pouvant être calculés. KPI final
+Provenance Conserver les sources ayant contribué à chaque valeur produite. Document / page /
+chunk
+Exigences non
+fonctionnelles
+taux d’exactitude Maximiser la proportion de KPI correctement extraits ou
+reconstruits. A= Ncorrects
+Nvalus
+Latence Limiter le temps nécessaire au traitement complet d’un rapport. Lavg = 1
+N
+NX
+i=1
+ti
+Coût Maîtriser le coût d’exécution du pipeline, notamment celui des
+appels aux modèles. Cavg = 1
+N
+NX
+i=1
+Ci
+Traçabilité Permettre d’expliquer et d’auditer l’origine de chaque KPI
+produit. KPI→Source
+Robustesse Tolérer les variations de mise en page, de terminologie, de
+qualité documentaire et les informations manquantes. Formats variés
+Table 3– Synthèse des spécifications du système
+Walid Benmaarouf2026 11\n\n

@@ -1,0 +1,564 @@
+--- PAGE 13 ---\nL’intelligence documentaire en action
+2.4 Conception du système d’intelligence documentaire
+Le système a été conçu comme une architecture modulaire séparant les tâches de perception documentaire,
+de recherche d’information, d’extraction, de reconstruction et de validation. Contrairement à une chaîne
+purement séquentielle, certains composants peuvent déclencher de nouvelles recherches ou réévaluer des
+résultats intermédiaires.
+L’architecture générale peut être résumée par :
+PDF→Ingestion→Extraction du contexte→{U 1,...,U N}
+→[Retrieval→Extraction→Graphe→Calcul→Validation] Ui
+Les modèles de langage mobilisés dans cette architecture reposent sur le paradigme Transformer, in-
+troduit par Vaswani et al. [1], dont le mécanisme d’attention constitue aujourd’hui un fondement des
+Large Language Models modernes. Cette séparation permet notamment de limiter le rôle des modèles
+probabilistes. Les LLM sont principalement utilisés pour la compréhension documentaire, la classification
+et la planification, tandis que les calculs et les contrôles critiques restent déterministes.
+PDF Ingestion
+multimodale
+Hybrid
+Retrieval
+Structured
+Extraction
+Dependency
+GraphComputationValidationValidated
+KPI
+Corrector Agent
+Figure 4– Architecture générale simplifiée du système d’intelligence documentaire
+Un agent correcteur est connecté transversalement aux principaux composants du pipeline. Son rôle
+détaillé sera présenté la section "Validation et mécanismes de correction".
+2.4.1 Ingestion et compréhension multimodales
+L’ingestion ne repose pas sur une simple transformation
+PDF→OCR→Texte.
+Les rapports financiers présentent des structures très différentes : certains contiennent principalement du
+texte natif, tandis que d’autres intègrent des pages scannées, des tableaux, des graphiques ou des éléments
+dont l’information textuelle n’est pas directement accessible.
+Le système applique donc plusieurs stratégies de parsing selon le type et la structure du document. Une
+Walid Benmaarouf2026 12\n\n--- PAGE 14 ---\nL’intelligence documentaire en action
+première extraction récupère le contenu textuel directement accessible à l’aide de bibliothèques adaptées
+au format du PDF.
+En parallèle, les éléments nécessitant une analyse visuelle sont identifiés. Les tableaux sont notamment
+localisés à l’aide de Table Transformer (TATR), une architecture utilisée pour la détection et l’analyse
+de structures tabulaires dans des documents [2], tandis que les zones graphiques ou non directement
+exploitables peuvent être rasterisées puis traitées par OCR ou par un modèle Vision-Language.
+Le processus peut être représenté de manière simplifiée par :
+PDF→
+
+
+
+Parsing natif→T native
+Détection de tableaux→T table
+OCR / Vision→T visual
+Les informations récupérées ne sont pas conservées comme des flux indépendants. Les sorties issues de
+l’OCR, des tableaux et de l’analyse visuelle sont réintroduites à leur position logique dans le texte parsé
+afin de construire une représentation documentaire consolidée :Tcombined =Merge(T native,T table,T visual)
+Cette étape permet de conserver autant que possible la structure et le contexte du document tout en
+intégrant des informations qui auraient été perdues avec un parsing textuel classique.
+Chaque page est ensuite associée à une représentation enrichie :Pagei→(T i,V i,M i)
+où Ti représente le contenu textuel consolidé,Vi les informations issues de l’analyse visuelle etMi les
+métadonnées associées.
+Afin de respecter les contraintes de taille imposées aux modèles multimodaux, la rasterisation adapte
+également la résolution jusqu’à vérifier :S(p,d)≤S max
+oùpreprésente la page,dsa résolution etS max la taille maximale autorisée.
+Les métadonnées extraites comprennent notamment les entités, les périodes, les KPI candidats ainsi que
+des informations utiles au retrieval. Elles sont ensuite consolidées au niveau du document.
+Chaque unité indexée contient finalement :Ci = (text i, pagei, documenti, metadatai, embeddingi)
+Cette représentation conserve simultanément le contenu, sa représentation sémantique et sa provenance
+documentaire.
+2.4.2 Partitionnement initial par compagnie et période
+Un rapport PDF ne porte pas nécessairement sur une seule compagnie aérienne ni sur une seule période.
+Au contraire, un même document peut contenir des informations relatives à plusieurs compagnies et
+présenter simultanément plusieurs périodes financières. Or, le système doit produire un jeu de KPI distinct
+pour chaque compagnie appartenant au périmètre métier traité et pour chacune des périodes concernées.
+Un seul PDF peut ainsi conduire à plusieurs sorties indépendantes. Par exemple, un rapport peut
+mentionnerLufthansa Group,SWISS,Brussels Airlines,Eurowingsou encoreAustrian Airlines, tout en
+contenant des données pour les périodes Q4, H2 et l’exercice annuel. Si le périmètre configuré pour le
+traitement ne retient queLufthansa GroupetSWISS, le système doit alors produire six résultats distincts :
+Walid Benmaarouf2026 13\n\n--- PAGE 15 ---\nL’intelligence documentaire en action
+(Lufthansa Group,Q4),(Lufthansa Group,H2),(Lufthansa Group,A),
+(SWISS,Q4),(SWISS,H2),(SWISS,A).
+Cette séparation est réalisée très tôt dans la chaîne de traitement, immédiatement après l’extraction
+textuelle du PDF. Un premier passage par un LLM analyse le contenu obtenu afin d’identifier les différentes
+unités métier présentes dans le document. Chaque unité est décrite par :
+Ui = (nom_compagnie,code_IATA,code_ICAO,période,année)
+Le nom de la compagnie et ses identifiants permettent de rattacher les informations à l’entité correcte,
+tandis que la période et l’année définissent le contexte temporel dans lequel les KPI devront être extraits
+ou reconstruits. Les unités ne correspondant pas aux compagnies configurées dans le périmètre du système
+sont écartées à ce stade.
+Figure 5– Détection des contextes métier et génération des unités de traitement
+Si l’on noteA le nombre de compagnies retenues etP le nombre de périodes à traiter, le système peut
+donc générer :N=A×P
+flux de traitement à partir d’un même rapport. Dans l’exemple précédent,A = 2et P = 3, d’où :N = 6.
+Le point essentiel est que ces flux ne constituent pas de simples variantes d’une même exécution. À
+partir de cette séparation, chacun est traité comme une chaîne totalement indépendante, avec son propre
+contexte compagnie–période–année.
+Ainsi, le retrieval, la projection dans l’espace des vecteurs signés, la recherche complémentaire, le classement
+des fragments, l’extraction structurée, la construction du graphe de dépendances, les calculs et la validation
+sont tous exécutés séparément pour chaque unitéUi.
+Walid Benmaarouf2026 14\n\n--- PAGE 16 ---\nL’intelligence documentaire en action
+Figure 6– Exécution indépendante de la chaîne aval pour chaque unité de traitement
+Dans toute la suite de cette section, le fonctionnement du retrieval, du vecteur signé, de la reconstruction
+et de la validation est donc présentéà l’échelle d’un seul flux de traitementUi. Le même processus
+est ensuite exécuté indépendamment pour chacune des autres unités générées à partir du document.
+2.5 Retrieval hybride
+Le paradigme Retrieval-Augmented Generation (RAG) combine un mécanisme de recherche d’information
+avec un modèle génératif afin d’exploiter des connaissances externes [3]. Dans ce type d’approche, la
+recherche sémantique s’appuie notamment sur des représentations vectorielles permettant d’estimer la
+proximité entre une requête et des fragments documentaires [4].
+Cette approche constitue une amélioration importante par rapport à une extraction reposant uniquement
+sur le parsing ou l’OCR, mais elle reste insuffisante dans le cas étudié. Les embeddings indiquent qu’un
+fragment est sémantiquement proche d’une requête, sans permettre de déterminer si les informations qu’il
+contient suffisent réellement à reconstruire le KPI.
+Pour un KPI défini par :Ki =f(x a,x b)
+un fragment peut ainsi être indispensable au calcul sans contenir directement le KPI recherché. À l’inverse,
+un fragment très proche sémantiquement peut ne contenir qu’une partie des variables nécessaires. La
+proximité sémantique ne garantit donc pas la capacité de reconstruction : Similarity̸=Computability
+L’enjeu n’est alors plus uniquement de retrouver les fragments les plus similaires, mais d’identifier un
+ensemble d’informations permettant de rendre le KPI calculable. Pour répondre à cette limite, le système
+développé complète la recherche sémantique par une représentation symbolique des informations nécessaires
+à chaque KPI.
+“‘latex
+2.5.1 Représentation symbolique par vecteur signé
+La représentation symbolique part d’un constat simple : un KPI n’est pas toujours présent directement
+dans un fragment. Il peut également être reconstruit à partir de deux informations complémentaires,
+Walid Benmaarouf2026 15\n\n--- PAGE 17 ---\nL’intelligence documentaire en action
+éventuellement situées dans des fragments différents.
+Pour un KPI cibleKi, on considère donc sa présence directe ainsi que les différents couples de variables
+pouvant permettre sa reconstruction. Une relation métier peut par exemple s’écrireKi =f (xa,x b), oùxa
+et xb peuvent être des variables financières ou d’autres KPI déjà disponibles. Un même KPI peut disposer
+de plusieurs chemins possibles, par exempleKi =f 1(x1,x 2)ouK i =f 2(x3,x 4).
+Le retrieval ne consiste donc plus uniquement à rechercher un fragment mentionnantKi, mais à retrouver
+les deux composantes d’au moins un de ces chemins de reconstruction.
+Des métadonnées documentaires vers une représentation symboliqueLors de l’analyse documen-
+taire, chaque fragmentci est associé à des métadonnées structurées. Pour le vecteur signé, seules les informa-
+tionsutilesauKPIrecherchésontconservées.Onnoteainsi Mv(ci) ={KPI cible ou variables utiles détectés dansci}.
+Ces informations sont projetées dans un espace de variables candidates propre au KPI, notéDKi =
+(Ki,x 1,x 2,...,x d). Cet espace regroupe le KPI cible et les variables susceptibles d’intervenir dans ses
+différents chemins de reconstruction.
+Chaque fragment est alors représenté par un vecteur symboliquevKi(ci)∈{−1,0,+1,∅} d+1, où :
+
+
+
+0le KPI cible est directement présent,
++1une composante d’une relation est présente,
+−1sa composante complémentaire est présente,
+∅l’information correspondante n’est pas détectée.
+Les signes+1et −1ne correspondent pas aux coefficients numériques d’une formule. Ils codent uniquement
+la complémentarité entre les deux variables d’une même relation de reconstruction.
+Pour une relation donnéer, retrouver ses deux composantes produit symboliquement+1 + (−1) = 0.
+Cette annulation n’est évaluée qu’entre deux variables appartenant à la même relation : une composante
+provenant d’un cheminf1 ne peut donc pas annuler une composante appartenant à un autre cheminf2.
+Le symbole0joue ainsi le rôle d’un état de complétude : il indique soit que le KPI est directement présent,
+soit que les deux informations nécessaires à un chemin de reconstruction ont été retrouvées.
+Exemple de projectionConsidérons le KPIPassenger Revenue, pouvant par exemple être reconstruit
+parPassengerRevenue=TotalRevenue−TrafficRevenue.
+L’espace correspondant peut être notéDP R = (PassengerRevenue,TotalRevenue,TrafficRevenue ),
+avec la signature symbolique(0,+1,−1).
+Si un fragmentc1 contient directementPassenger Revenue, alors Mv(c1) = {PassengerRevenue} et
+vP R(c1) = (0,∅,∅). Le KPI est disponible et aucune recherche complémentaire n’est nécessaire.
+Supposons maintenant qu’un fragmentc2 contienne uniquementTotal Revenue. On obtientvP R(c2) =
+(∅, +1,∅ ). Le système sait alors que la composante complémentaire de cette même relation doit encore
+être retrouvée.
+Si un fragmentc3 contient ensuiteTraffic Revenue,vP R(c3) = ( ∅,∅,− 1). Les deux fragments couvrent
+alors le couple associé à cette relation et l’agr\n\n--- PAGE 18 ---\nL’intelligence documentaire en action
+Le même principe s’applique lorsqu’un KPI possède plusieurs chemins. SiK =f1(x1,x 2)ou K =f2(x3,x 4),
+retrouver(x1,x 2)suffit à compléter le premier chemin, tandis que retrouver(x3,x 4)complète le second.
+En revanche, retrouverx1 etx4 ne produit aucune complétude, car ces variables appartiennent à deux
+relations différentes.
+Recherche guidée par les informations manquantesCette représentation permet de transformer
+une recherche passive en une recherche guidée par les informations manquantes. Lorsqu’une composante
++1est retrouvée pour une relation donnée, le système recherche son complément−1dans cette même
+relation, et réciproquement.
+Les principaux états sont donc :0⇒ KPI directement disponible,+1⇒ recherche de la composante
+complémentaire,−1⇒ recherche de son complément, et+1 + (−1) = 0 ⇒ chemin de reconstruction
+complet.
+Pour un ensemble de fragmentsC ={c1,...,c m}, le retrieval cherche ainsi non seulement les fragments
+les plus proches sémantiquement, mais un ensemble couvrant les informations nécessaires à au moins un
+chemin de reconstruction :
+Retrieval(K) =Pertinence sémantique+Complétude des informations
+Les embeddings servent à identifier les fragments pertinents, tandis que la représentation signée permet
+de suivre la présence des variables complémentaires et de décider si une recherche supplémentaire est
+nécessaire.
+Cette représentation ne contient cependant pas la sémantique de la formule : elle sait que deux variables
+appartiennent au même chemin de reconstruction, mais ne détermine ni l’opération à appliquer, ni les
+conversions éventuelles, ni l’ordre des calculs. Elle répond uniquement à la question« Ai-je retrouvé les
+informations nécessaires pour reconstruire le KPI? »
+Le graphe de dépendances intervient ensuite pour exploiter ces informations. Il décrit les formules
+disponibles, les dépendances entre variables et l’ordre dans lequel elles doivent être résolues. Il répond
+donc à une question différente :« Comment utiliser ces informations pour calculer le KPI? »“‘
+2.5.2 Catégorisation et classement des fragments
+Après la projection dans l’espace symbolique, les fragments candidats sont répartis dans des catégories
+de priorité selon les informations qu’ils contiennent pour le KPI recherché. On définit la hiérarchie
+A≻B≻C.
+La catégorieA regroupe les fragments contenant directement le KPI cible, c’est-à-dire ceux pour lesquels
+le vecteur contient0. Ils constituent donc les résultats prioritaires puisqu’aucune reconstruction n’est
+nécessaire.
+La catégorieB regroupe les fragments contenant, pour une même relation de reconstruction, les deux
+composantes complémentaires+1et −1. Le KPI n’est pas explicitement présent, mais les informations
+nécessaires à son calcul sont déjà réunies dans le fragment.
+La catégorieC correspond enfin aux fragments ne contenant qu’une seule composante,+1ou−1. Ils sont
+pertinents mais incomplets et nécessitent une recherche complémentaire afin de retrouver la composante
+ma\n\n--- PAGE 19 ---\nL’intelligence documentaire en action
+Les catégories constituent le premier niveau de classement. Ainsi, un fragment de catégorieA reste
+prioritaire par rapport à un fragment de catégorieB, lui-même prioritaire par rapport à un fragment de
+catégorieC, indépendamment de leur score numérique.
+L’utilisation de modèles de langage pour réévaluer la pertinence de résultats issus d’un moteur de recherche
+a notamment été étudiée dans le cadre du re-ranking par LLM [5].
+Dans notre système, ce signal n’est cependant pas utilisé seul. À l’intérieur d’une même catégorie, les
+fragments sont ordonnés à partir d’un score combinant une estimation d’importance produite par un LLM
+et leur proximité sémantique avec la requête :
+Score(c,q) =I(c) +λcos(E q,E c)
+où :
+—creprésente le fragment candidat;
+—qreprésente la requête associée au KPI;
+—E q est l’embedding de la requête;
+—E c est l’embedding du fragment;
+—cos(E q,E c)mesure leur similarité sémantique;
+—I(c)est un score d’importance attribué au fragment par un LLM;
+—λcontrôle le poids relatif de la similarité sémantique.
+Le scoreI(c)est produit lors de l’analyse documentaire. Le LLM évalue l’importance du fragment sur une
+échelle allant de−10à10en fonction de son contenu et de son intérêt potentiel pour l’extraction des KPI.
+Le classement est donc hiérarchique :Rank(c) = (Category(c),Score(c,q))
+La catégorie est évaluée en premier, puis le score permet de départager les fragments appartenant à une
+même catégorie.
+Un seuil minimalτest également appliqué :Score(c,q)≥τ
+Les fragments dont le score est inférieur au seuil sont éliminés, y compris lorsqu’ils appartiennent à une
+catégorie de priorité élevée.
+Le retrieval combine ainsi quatre informations complémentaires :
+Signed Vector+Category+LLM Importance+Semantic Similarity
+auxquelles s’ajoutent les contraintes de période et de compagnie.
+2.6 Extraction structurée et reconstruction des KPI
+Une décision importante de l’architecture consiste à séparerextractionetcalcul.
+À partir des fragments sélectionnés par le système de retrieval, le modèle extrait les informations disponibles
+sans effectuer directement les opérations numériques nécessaires à la reconstruction.
+Chaque KPI est alors associé à un état :state(Ki)∈{explicit, computable, missing}
+où :
+Walid Benmaarouf2026 18\n\n--- PAGE 20 ---\nL’intelligence documentaire en action
+—explicitindique que la valeur est directement disponible;
+—computableindique que les variables nécessaires au calcul ont été identifiées;
+—missingindique qu’au moins une information reste absente.
+Les résultats sont générés sous une forme structurée contenant notamment l’identifiant du KPI, sa valeur
+éventuelle, sa période, son statut, ses dépendances et sa provenance.
+2.6.1 Graphe de dépendances et construction du contexte de résolution
+Après l’extraction structurée, chaque KPI est associé à un ensemble d’informations décrivant son état,
+les variables déjà disponibles, leur provenance ainsi que les relations permettant éventuellement de le
+reconstruire. Le graphe de dépendances complète cette représentation en explicitant les différents chemins
+de calcul possibles.
+On note :
+G= (V,E)
+où V représente les KPI et les variables intermédiaires, tandis queE représente leurs relations de
+dépendance.
+Le graphe n’effectue donc pas directement les calculs. Il fournit au composant de résolution une représen-
+tation structurée des possibilités disponibles. Pour un KPIKi, plusieurs chemins peuvent par exemple
+exister :
+Ki =f 1(x1,x 2)ouK i =f 2(Kj,x 3)
+La sortie du graphe est ensuite combinée avec le JSON produit lors de l’extraction structurée. L’agent de
+résolution reçoit ainsi un contexte fortement contraint contenant notamment :
+CKi ={valeurs disponibles,formules possibles,dépendances,sources,unités,devises,métriques,période}
+Les fragments sources ayant conduit à l’extraction sont également conservés dans ce contexte. L’objectif
+est de fournir à l’agent uniquement les informations utiles à la résolution du KPI, plutôt que de lui
+transmettre de nouveau l’ensemble du document.
+Le graphe joue ainsi le rôle de structure de raisonnement : il indique quelles voies de reconstruction sont
+possibles et quelles dépendances restent à résoudre. La décision sur la manière de les résoudre est ensuite
+prise par l’agent présenté dans la section suivante.
+2.6.2 Agent de résolution et orchestration itérative des outils
+La reconstruction finale des KPI est pilotée par un agent de résolution. À partir du contexteCKi, celui-ci
+analyse les chemins proposés par le graphe, identifie les informations manquantes et construit un plan
+d’actions.
+Contrairement à une exécution statique, ce plan peut évoluer au cours de la résolution. Après chaque
+Walid Benmaarouf2026 19\n\n--- PAGE 21 ---\nL’intelligence documentaire en action
+action, son résultat est réinjecté dans le contexte, puis l’agent raisonne de nouveau afin de déterminer
+l’étape suivante :
+Ct→Plan t→Tool t→Result t→C t+1
+Ce cycle est répété jusqu’à ce qu’un chemin de calcul soit entièrement résolu ou qu’aucune reconstruction
+fiable ne soit possible.
+L’agent dispose principalement de trois familles d’outils :
+T={Math,History,Retrieval}
+— Mathexécute les formules déterministes ainsi que les conversions nécessaires de devise, d’unité ou
+de métrique;
+— Historyinterroge les données historiques disponibles, notamment lorsque la reconstruction nécessite
+une valeur provenant d’une autre période;
+— Retrievalrelanceunerecherchedocumentairecibléeavecunenouvellerequêtelorsqu’unedépendance
+n’a pas été retrouvée dans le contexte initial.
+Considérons par exemple un KPIK4 pour lequel le graphe propose initialement :K4 = x1
+x2
+Six 2 est absent, l’agent peut explorer un autre chemin disponible :K4 = K1
+K3
+Supposons cependant queK1 soit également manquant. Le graphe indique que ce KPI est sommable dans
+le temps et que la période recherchée estH1. L’agent peut alors déduire :KH1
+1 =K Q1
+1 +K Q2
+1
+Il planifie dans ce cas la récupération deKQ1
+1 et KQ2
+1 à partir des données historiques. Cette opération
+est exécutée par le moteur d’accès aux données, basé sur les résultats historiques persistés en CSV.
+Une fois ces valeurs récupérées, elles sont ajoutées au contexte. L’agent peut alors planifier le calcul de
+KH1
+1 , puis reprendre la résolution deK4.
+Le moteur mathématique ne se limite pas à appliquer une opération arithmétique. Avant le calcul,
+l’agent doit également vérifier la compatibilité des valeurs utilisées et planifier, lorsque nécessaire, les
+transformations dans le bon ordre :
+valeurs brutes→normalisation des métriques→conversion des unités→conversion monétaire→calcul
+Les transformations elles-mêmes restent déterministes; le rôle de l’agent est de sélectionner et d’ordonner
+les opérations nécessaires.
+La résolution d’un KPI peut donc nécessiter plusieurs itérations combinant raisonnement, recherche
+documentaire, accès aux données historiques et calcul. Le LLM agit comme orchestrateur du processus,
+tandis que les opérations vérifiables sont déléguées à des composants spécialisés.
+Cette séparation permet de conserver la flexibilité du raisonnement par LLM sans lui confier directement
+les opérations numériques critiques, ce qui améliore la reproductibilité et la traçabilité du résultat final.
+Walid Benmaarouf2026 20\n\n--- PAGE 22 ---\nL’intelligence documentaire en action
+2.7 Validation et mécanismes de correction
+La validation combine des contrôles déterministes sur le schéma, les unités, les périodes et la cohérence
+mathématique. Lorsqu’une anomalie peut être corrigée sans ambiguïté, une règle déterministe est appliquée
+directement.
+Anomalie Correction
+Format ou unité invalide Normalisation déterministe
+Période ou variable manquante Retrieval ciblé
+Incohérence arithmétique Recalcul / rejet
+Erreur d’interprétation Corrector Agent
+Table 4– Principaux mécanismes de validation et de correction
+Les erreurs qui ne peuvent pas être résolues de manière déterministe déclenchent unCorrector Agent.
+C’est notamment le cas lorsqu’un LLM situé en amont a mal interprété un document, une variable ou une
+relation entre plusieurs informations.
+À partir de l’erreur observée et des traces du pipeline, cet agent identifie le composant probablement res-
+ponsable puis demande uniquement la réexécution ou la correction de cette étape :Error→Diagnosis→
+Targeted Correction→Retry
+Ce mécanisme évite de relancer l’ensemble du pipeline et permet de corriger des erreurs sémantiques qui
+ne peuvent pas être détectées ou réparées par de simples règles.
+2.8 Industrialisation et observabilité
+Le prototype a progressivement été transformé en pipeline industrialisable afin de permettre son exécution
+de manière reproductible dans l’environnement Amadeus. La chaîne d’exécution repose sur un workflow
+automatisé allant du dépôt des rapports financiers jusqu’à la génération des résultats structurés.
+Figure 7– Chaîne d’exécution industrialisée du pipeline
+Les rapports PDF sont d’abord déposés dans Amazon S3. Leur présence déclenche un job Jenkins chargé
+de lancer le traitement. Plusieurs pipelines peuvent être exécutés en parallèle lorsque plusieurs rapports
+sont à traiter.
+Afin de respecter les limites imposées aux appels aux modèles, l’exécution repose sur un mécanisme
+hiérarchique detoken buckets. Chaque pipeline possède un quota local régulant ses propres appels LLM,
+tandis qu’un quota global partagé contrôle la consommation cumulée de l’ensemble des pipelines exécutés
+en parallèle. Un appel n’est effectué que lorsque les deux niveaux disposent d’une capacité suffisante;
+sinon, il est différé jusqu’au renouvellement du quota.
+Cetterégulationpermetdeconserverleparallélismedutraitementtoutenlimitantlespicsdeconsommation
+et les erreurs liées auxrate limits. Les résultats finaux sont ensuite exportés au format CSV et persistés
+Walid Benmaarouf2026 21\n\n--- PAGE 23 ---\nL’intelligence documentaire en action
+dans Amazon S3.
+Figure 8– pipelines parallèles avec limitation de débit hiérarchique
+Chaque traitement possède également un état explicite permettant de suivre son évolution :
+[ Pending→Processing→Completed]
+ou, en cas d’erreur :
+[ Processing→Failed→Retry]
+Les documents bruts, métadonnées, résultats intermédiaires et logs sont persistés afin de permettre la
+reprise sur erreur, le diagnostic des échecs et l’audit des traitements.
+La conteneurisation garantit la reproductibilité des environnements, tandis que la chaîne CI/CD automatise
+les principales étapes du cycle de déploiement :
+[ Code→Build→Test→Deploy]
+Enfin, l’observabilité complète cette architecture en suivant notamment :
+[ O=latency, tokens, errors, throughput, cost ]
+Ces métriques permettent de suivre les performances techniques et économiques du pipeline, notamment
+le temps moyen de traitement, le taux d’erreur, le nombre de retries, le débit de traitement ainsi que le
+coût associé aux appels aux modèles.
+2.9 Résultats et perspectives
+L’évaluation repose sur les données historiques disponibles avant 2025, utilisées commeground truth. Pour
+chaque combinaison compagnie–période, les KPI produits par le pipeline sont comparés aux valeurs de
+référence après normalisation.
+Walid Benmaarouf2026 22\n\n--- PAGE 24 ---\nL’intelligence documentaire en action
+La métrique principale est :tauxd′exactitude= NKPI corrects
+NKPI valus
+L’étude a porté sur300 rapports PDFprovenant de plusieurs compagnies et présentant des structures
+documentaires variées. Comme un même document peut contenir plusieurs compagnies ou plusieurs
+périodes, ces rapports ont généré525 sorties indépendantes. Chaque sortie comprenant les neuf KPI
+définis dans les spécifications, l’évaluation porte au total sur :525×9 = 4725KPI
+Cette évaluation sur des données réelles permet de couvrir plusieurs années, compagnies et configurations
+documentaires sans recourir à des données artificielles, difficiles à générer de manière cohérente avec
+l’ensemble des dépendances métier.
+Les résultats montrent untaux d’exactitude comprise entre 99,08% et 100%selon les compagnies
+testées. Cette métrique est complétée par le temps moyen de traitement et le coût d’exécution.
+Les principaux cas d’échec concernent les erreurs de période, les documents bruités, les informations
+manquantes et certaines dépendances mal identifiées. Ces limites ont notamment conduit à l’ajout du
+retrieval complémentaire, de la validation déterministe et du mécanisme de correction ciblée.
+Les principales perspectives concernent désormais l’utilisation de modèles plus spécialisés, l’optimisation
+du routage, la réduction du contexte transmis, l’amélioration du graphe de dépendances et l’automatisation
+continue de l’évaluation. Les résultats obtenus sont présentés dans la Figure 9.
+Figure 9– Résultats expérimentaux : taux d’exactitude, coût et temps moyen de traitement
+Les expérimentations montrent untaux d’exactitude compris entre 99,08% et 100%selon les
+compagnies testées. Le temps moyen de traitement varie d’environ5,6 à 13 minutes par sortie, tandis
+que le coût d’exécution reste de l’ordre de quelques dollars, en fonction de la taille et de la complexité du
+rapport ainsi que du nombre d’appels aux modèles nécessaires.
+À titre de comparaison, le processus précédent reposait sur un prestataire externe, avec un taux d’exactitude
+estimé à environ95%, un délai de traitement généralement compris entreune et deux semaineset un
+coût d’environ30$ par Airline-period traité. Ce processus offrait également une traçabilité limitée
+sur l’origine des valeurs produites et sur les étapes ayant conduit au résultat final.
+La solution développée améliore ainsi simultanément le taux d’exactitude, le délai de traitement, le coût
+et la traçabilité des KPI produits. L’internalisation du processus permet également à l’équipe de mieux
+contrôler son évolution, son évaluation et ses mécanismes de correction.
+Les principales perspectives concernent désormais l’utilisation de modèles plus spécialisés, l’optimisation
+du routage des modèles, la réduction du contexte transmis, l’amélioration du graphe de dépendances et
+Walid Benmaarouf2026 23\n\n--- PAGE 25 ---\nL’intelligence documentaire en action
+l’automatisation continue de l’évaluation.
+2.10 Difficultés, limites et regard critique
+Malgré les performances obtenues, plusieurs limites subsistent. La première concerne la dépendance
+aux interprétations produites en amont par les modèles : une erreur sur une période, une variable ou
+une relation peut rester cohérente en apparence et se propager jusqu’au moteur de reconstruction. Les
+mécanismes de validation réduisent ce risque sans pouvoir l’éliminer totalement.
+La seconde limite concerne la généralisation. L’évaluation repose sur les rapports historiques disponibles
+et couvre plusieurs compagnies et structures documentaires, mais elle ne garantit pas un comportement
+identique face à un format totalement nouveau ou particulièrement bruité.
+Enfin, l’architecture obtenue est plus robuste qu’un pipeline RAG simple, mais également plus complexe
+à maintenir et à optimiser. Le principal compromis porte donc sur le niveau de complexité réellement
+nécessaire pour augmenter la fiabilité sans multiplier inutilement les appels aux modèles, la latence et le
+coût. Les prochaines évolutions devront ainsi privilégier la simplification et la spécialisation des composants
+lorsque cela est possible.
+3. Entretien métier
+Dans le cadre de cette alternance, j’ai réalisé un entretien avec mon tuteur afin de mieux comprendre le
+métier d’Ingénieur Data chez Amadeus, les compétences qu’il mobilise et ses perspectives d’évolution.
+Son rôle consiste principalement à concevoir, développer et maintenir des solutions Big Data destinées
+aux produits déployés pour les clients d’Amadeus. Il intervient sur l’ensemble du cycle de vie des données,
+depuis leur ingestion jusqu’à leur exploitation. Ses missions couvrent le développement de pipelines
+robustes et scalables, l’amélioration continue des solutions existantes ainsi que leur maintien en condition
+opérationnelle. Le suivi de la production et la résolution d’incidents occupent également une place
+importante afin de garantir la fiabilité des services.
+Sur le plan organisationnel, nous appartenons à la même équipe. Celle-ci est désormais encadrée par
+Mireille Boyer, qui en a repris le management en mai 2026. Auparavant, Jérémie Montiel, dont le rôle
+principal est celui deData Principal, avait assuré cette fonction par intérim pendant près d’un an. Le
+travail quotidien s’inscrit dans une organisation Agile avec desdaily meetings, des points de suivi, des
+iteration reviewset des PI Plannings. Le métier implique également des interactions régulières avec les
+équipes produit, les Data Scientists, les architectes et d’autres équipes techniques.
+Concernant son parcours, mon tuteur a suivi une classe préparatoire en mathématiques et informatique,
+puis une école d’ingénieurs spécialisée en informatique. Il a ensuite réalisé une alternance chez EDF
+avant de rejoindre Amadeus. Sur le plan technique, son métier nécessite notamment une bonne maîtrise
+d’Apache Spark, de Scala et de Python. Bash est ut\n\n--- PAGE 26 ---\nL’intelligence documentaire en action
+lors des revues de code, du partage de connaissances ou de la résolution collective d’incidents.
+Selon lui, l’un des principaux intérêts du métier réside dans la diversité des problèmes rencontrés et le
+challenge intellectuel associé à leur résolution. L’environnement Amadeus permet de travailler sur des
+systèmes à grande échelle soumis à de fortes contraintes de performance et de disponibilité. Cela oblige à
+trouver un équilibre entre innovation technique, scalabilité, coût et fiabilité en production.
+L’intelligence artificielle générative devrait également faire évoluer ce métier. Certaines tâches répétitives
+liées au monitoring, à la maintenance ou à l’analyse d’incidents pourraient progressivement être assistées
+par des agents intelligents. Le rôle de l’ingénieur pourrait alors se concentrer davantage sur la conception
+d’architectures, l’optimisation des systèmes et les problématiques nécessitant une expertise technique
+avancée.
+À moyen terme, son objectif est d’évoluer vers un poste d’architecte Big Data afin d’intervenir davantage
+sur la conception globale de plateformes et de pipelines à grande échelle. Pour un jeune ingénieur souhaitant
+suivre une trajectoire similaire, il recommande d’évoluer dans un environnement technique exigeant, de
+travailler avec des profils expérimentés et de conserver une forte curiosité. Dans un domaine en évolution
+rapide, la capacité à apprendre continuellement reste selon lui aussi importante que la maîtrise d’une
+technologie particulière.
+Walid Benmaarouf2026 25\n\n--- PAGE 27 ---\nL’intelligence documentaire en action
+4. Bilan personnel
+Cette alternance a constitué une expérience particulièrement formatrice, aussi bien sur le plan technique
+que professionnel. La mission qui m’a été confiée était sensiblement différente des sujets abordés dans mon
+cursus académique. Si ma formation m’avait apporté de solides bases en informatique et en intelligence
+artificielle, une grande partie des concepts nécessaires au projet relevait plus spécifiquement de l’ingénierie
+moderne des systèmes de Generative AI.
+J’ai ainsi dû approfondir de manière autonome le fonctionnement des Large Language Models (LLM) :
+tokens, fenêtre de contexte, mécanismes d’attention, paramètres d’inférence, prompt engineering et
+générationstructurée. J’aiégalementdéveloppémescompétencessurlesarchitecturesRAG,lesembeddings,
+les bases de données vectorielles, les Vision-Language Models (VLM), les systèmes agentiques, le tool calling
+et les graphes de dépendances. Cette montée en compétences concernait également l’industrialisation avec
+AWS, Amazon Bedrock, S3, Docker, Jenkins, CI/CD, le déploiement et l’observabilité.
+Certains de ces concepts étaient entièrement nouveaux pour moi. J’avais néanmoins commencé à me former
+de manière autonome avant mon arrivée, notamment durant l’été, car la Generative AI était un domaine
+qui m’intéressait particulièrement. Cette expérience m’a surtout fait comprendre qu’un ingénieur doit
+continuellement apprendre et s’adapter, particulièrement dans un domaine aussi évolutif que l’intelligence
+artificielle.
+Savoir-faire et savoir-être développés
+J’ai surtout appris à aborder un problème complexe comme un véritable problème d’ingénierie. Au début
+du projet, j’ai exploré différentes architectures, réalisé lesystem design, comparé les technologies et les
+modèles disponibles et étudié leurs avantages, leurs limites et leurs coûts. Après validation de l’architecture,
+j’ai progressivement implémenté et testé chaque composant avant de les intégrer dans un pipeline complet.
+Cette démarche m’a permis de développer davantage de rigueur dans la définition des hypothèses, les tests,
+l’analyse des erreurs et l’amélioration itérative du système. La solution finale ne repose pas simplement
+sur un LLM, mais combine traitement multimodal, retrieval sémantique et symbolique, RAG, graphes de
+dépendances, calcul déterministe, validation et monitoring.
+Sur le plan du savoir-être, j’ai développé mon autonomie, ma capacité d’adaptation et ma communication
+technique. Lesdaily meetingsm’ont appris à présenter clairement les avancées, les prochaines étapes et les
+blocages rencontrés. L’équipe m’a beaucoup accompagné, notamment sur l’environnement Amadeus, AWS,
+l’infrastructure, le déploiement et les procédures internes, tout en me laissant une forte autonomie. J’ai
+également particulièrement apprécié l’intégration humaine dans l’équipe et les activités réalisées ensemble.
+Apports réciproques et atteinte des objectifs
+L’un des objectifs principaux de mon alterna\n\n--- PAGE 28 ---\nL’intelligence documentaire en action
+J’ai apporté à l’équipe Data Engineering une expertise complémentaire en intelligence artificielle. Ma
+connaissance des mécanismes internes des LLM m’a permis d’aller au-delà d’une simple utilisation de
+modèles ou d’agents et de contrôler plus finement leur comportement, leur contexte, leur génération, leurs
+outils et leurs mécanismes de retrieval.
+Le prototype a progressivement évolué vers une architecture complète intégrant ingestion multimodale,
+retrieval hybride, génération structurée, calcul, validation et observabilité.La faisabilité ayant été démontrée
+et la solution ayant évolué vers une architecture déployable, je considère que les principaux objectifs de
+mon alternance ont été atteints.
+Organisation, outils et évolution professionnelle
+La gestion du temps a suivi plusieurs phases : compréhension du problème et recherche, conception de
+l’architecture, développement et tests des composants, intégration puis industrialisation. J’ai travaillé de
+manière incrémentale en validant chaque composant avant de l’intégrer au système global, ce qui a permis
+d’identifier rapidement les erreurs et les limites.
+Par rapport au début de l’alternance, je maîtrise beaucoup mieux AWS, notamment Bedrock et S3, ainsi
+que Jenkins, Docker et les principes de CI/CD. J’ai également fortement progressé sur les LLM, VLM, RAG,
+embeddings, bases vectorielles, architectures agentiques et systèmes d’observabilité. La productionisation
+m’a également confronté aux problématiques de reproductibilité, de traitements asynchrones, de persistance,
+de gestion des erreurs et de scalabilité.
+Cette expérience a précisé mon orientation professionnelle et confirmé mon intérêt pour des postes
+à l’intersection de l’intelligence artificielle, de la Generative AI et du software/data engineering. Je
+souhaiterais également travailler dans ce type d’entreprise, car j’ai particulièrement apprécié la combinaison
+entre autonomie, responsabilités, accompagnement et complexité technique des projets.
+Enfin, cette alternance m’a permis de comprendre qu’un ingénieur ne se définit pas uniquement par les
+technologies qu’il maîtrise à un instant donné, mais surtout par sa capacité à apprendre, à s’adapter et à
+transformer un problème complexe en une solution fiable et industrialisable.
+Walid Benmaarouf2026 27\n\n--- PAGE 29 ---\nL’intelligence documentaire en action
+5. Projet professionnel
+Cette alternance a eu un rôle important dans la construction de mon projet professionnel, car elle
+m’a permis de confronter les connaissances acquises durant ma formation à un projet réel, avec des
+contraintes techniques, opérationnelles et industrielles. Avant cette expérience, je savais déjà que je
+souhaitais m’orienter vers l’intelligence artificielle. Cependant, je n’avais pas encore une vision aussi précise
+du type de problématiques sur lesquelles je souhaitais travailler. Cette année m’a permis de confirmer
+mon intérêt pour l’intelligence artificielle générative, tout en comprenant que ce qui m’intéresse réellement
+est de construire des systèmes d’IA complets et utilisables, et pas uniquement de travailler sur un modèle
+de manière isolée.
+Le projet réalisé durant mon alternance correspond particulièrement bien à cette vision. Il ne suffisait pas
+d’utiliser un LLM pour obtenir une réponse à partir d’un document. Il fallait partir de rapports financiers
+complexes et non structurés, comprendre où se trouvait l’information, traiter différents formats, retrouver
+les données pertinentes, reconstruire certains KPIs puis contrôler la cohérence des résultats. Le système
+développé combine ainsi plusieurs domaines qui m’intéressent : Generative AI, Vision-Language Models,
+RAG, embeddings, bases vectorielles, raisonnement, traitement de données et software engineering. La
+partie production m’a également permis de découvrir davantage les problématiques de cloud, de CI/CD,
+de monitoring et de déploiement. Le passage d’un prototype expérimental vers une architecture réellement
+déployable a été l’un des aspects les plus intéressants de mon expérience.
+Cette alternance m’a également permis d’évaluer ma capacité à travailler sur un sujet pour lequel je ne
+disposais pas initialement de toutes les connaissances nécessaires. Au début du projet, plusieurs technologies
+et concepts étaient nouveaux pour moi, notamment certains services AWS, Bedrock, l’environnement de
+déploiement interne ou encore certaines problématiques propres à l’industrialisation d’une application
+utilisant des LLM. La principale difficulté n’était donc pas uniquement de résoudre le problème technique,
+mais d’être capable d’apprendre suffisamment rapidement pour avancer malgré ces inconnues.
+J’ai progressivement compris qu’il n’était pas nécessaire de maîtriser toutes les technologies avant de
+commencer un projet. Une partie importante du travail d’un ingénieur consiste justement à être capable
+d’identifier ce qu’il ne connaît pas, de rechercher les informations nécessaires, d’expérimenter puis de
+prendre des décisions en fonction des résultats obtenus. Cette capacité d’apprentissage me semble d’autant
+plus importante dans le domaine de l’intelligence artificielle générative, où les modèles, les outils et les
+méthodes évoluent extrêmement rapidement.
+J’ai également identifié certaines difficultés auxquelles je devrai continuer à tr\n\n--- PAGE 30 ---\nL’intelligence documentaire en action
+évaluation, observabilité et déploiement.
+Je souhaite également continuer à approfondir les aspects plus fondamentaux des LLM et des modèles
+multimodaux. Comprendre les mécanismes d’attention, les représentations, les méthodes d’entraînement
+ou d’adaptation des modèles me semble important pour ne pas considérer les modèles comme de simples
+boîtes noires. Mon expérience durant l’alternance m’a justement montré que cette compréhension permet
+de prendre de meilleures décisions lorsque les approches standards atteignent leurs limites.
+À moyen terme, je souhaite évoluer vers des responsabilités où je pourrai intervenir sur l’ensemble du
+cycle de vie d’un système d’intelligence artificielle : compréhension du besoin, conception de l’architecture,
+expérimentation, développement, évaluation puis mise en production. Je souhaite travailler sur des projets
+où l’IA répond à un problème concret et où les performances du système peuvent être réellement mesurées.
+À terme, je souhaite être capable de prendre davantage de responsabilités sur les choix d’architecture et
+sur la conception technique de systèmes d’IA complexes.
+Cette expérience a donc davantage confirmé mon orientation qu’elle ne l’a complètement transformée.
+Elle m’a permis de passer d’un intérêt général pour l’intelligence artificielle à un projet professionnel
+beaucoup plus précis autour de la conception et de l’industrialisation de systèmes de Generative AI.
+Elle m’a surtout montré que cet environnement correspond à ma manière de travailler : comprendre un
+problème complexe, apprendre rapidement ce qui est nécessaire, expérimenter plusieurs approches puis
+transformer progressivement une idée en un système fonctionnel et fiable.
+Conclusion générale
+Cette alternance m’a permis de concevoir et d’industrialiser un système d’intelligence documentaire
+capable d’exploiter des rapports financiers complexes. Ce qui semblait au départ être un simple problème
+d’extraction de KPI s’est révélé beaucoup plus large, nécessitant de combiner traitement multimodal,
+retrieval hybride, raisonnement sur les dépendances, calcul et validation.
+Au-delà de la solution développée, cette expérience a surtout fait évoluer ma manière d’aborder un projet
+d’intelligence artificielle. J’ai compris qu’un système performant ne dépend pas uniquement du modèle
+utilisé, mais également de son architecture, de la qualité des données, de la robustesse des traitements, de
+la traçabilité, de l’observabilité et de sa capacité à être réellement déployé en production. Cette alternance
+confirme ainsi mon intérêt pour la conception de systèmes d’IA avancés, multimodaux et industrialisables.
+Walid Benmaarouf2026 29\n\n

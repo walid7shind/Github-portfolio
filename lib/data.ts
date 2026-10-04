@@ -245,17 +245,39 @@ export const content = {
           description:
             "AI-powered system for KPI extraction from airlines financial reports.",
           overview: `
-**AeroKpi Forge** is an **AI-powered pipeline** that extracts and computes key performance indicators (KPIs) from **airlines financial reports**.
+**AeroKpi Forge** turns heterogeneous airline financial PDFs into structured, traceable KPI outputs.
 
-It focuses on turning long, unstructured documents (PDF reports) into structured KPI outputs through an end-to-end workflow: ingestion → extraction → validation/scoring → computation → export.
+The system ingests mixed PDF content — native text, scanned pages, tables, and charts — then separates each company and reporting period before searching for the variables needed to reconstruct each KPI. It combines hybrid retrieval, dependency-aware calculation, and deterministic validation to keep the outputs auditable and explainable.
 
-You can find the repository here: [GitHub](https://github.com/walid7shind/AeroKpi-Forge)
+Repository: [GitHub](https://github.com/walid7shind/AeroKpi-Forge)
 
-Paper / write-up: [Hybrid symbolic-semantic multimodal RAG paper](/project%20assets/AeroKpi%20Forge/paper/Hybrid%20symbolic-semantic%20multimodal%20RAG%20paper.pdf)
+Paper: [AeroKpi report and technical write-up](/project%20assets/AeroKpi%20Forge/paper/rapport_walid_benmaarouf.pdf)
           `,
           punchline:
-            "AI-powered KPI extraction from airlines financial reports.",
-          techStack: ["Python", "RAG", "LLM", "PDF parsing"],
+            "From airline financial reports to traceable KPI outputs.",
+          techStack: {
+            documentProcessing: [
+              "Multimodal PDF ingestion",
+              "Table extraction and OCR",
+              "Page-level metadata extraction",
+              "Company and period separation",
+            ],
+            retrievalAndAi: [
+              "Hybrid symbolic-semantic retrieval",
+              "LLM-guided relevance scoring",
+              "Vector embeddings and signed metadata",
+              "Dependency-graph KPI reconstruction",
+            ],
+            dataAndOps: [
+              "Python",
+              "AWS S3",
+              "Jenkins CI/CD",
+              "Docker",
+              "Redis and SQS",
+              "Prometheus and Grafana",
+              "Apache Spark and Scala",
+            ],
+          },
           github: "https://github.com/walid7shind/AeroKpi-Forge",
           gallery: [
             "/project%20assets/AeroKpi%20Forge/data_architecture/simplified_architecture.png",
