@@ -191,6 +191,14 @@ export const content = {
           github: "https://github.com/walid7shind/AeroKpi-Forge",
         },
         {
+          slug: "data-quality",
+          title: "Data Quality",
+          description:
+            "Amadeus data-quality pipeline for the AlMatar dataset and delivery reliability.",
+          tech: ["Spark", "Scala", "Deequ", "S3"],
+          github: "https://github.com/walid7shind",
+        },
+        {
           slug: "lanesight",
           title: "LaneSight",
           description: "AI-powered lane perception for real-world driving scenes.",
@@ -245,9 +253,9 @@ export const content = {
           description:
             "AI-powered system for KPI extraction from airlines financial reports.",
           overview: `
-**AeroKpi Forge** turns heterogeneous airline financial PDFs into structured, traceable KPI outputs.
+**AeroKpi Forge** was developed at **Amadeus**, and I had **full ownership** of the project from architecture and implementation through validation and operationalization.
 
-The system ingests mixed PDF content — native text, scanned pages, tables, and charts — then separates each company and reporting period before searching for the variables needed to reconstruct each KPI. It combines hybrid retrieval, dependency-aware calculation, and deterministic validation to keep the outputs auditable and explainable.
+The system turns heterogeneous airline financial PDFs into structured, traceable KPI outputs. It ingests mixed PDF content — native text, scanned pages, tables, and charts — then separates each company and reporting period before searching for the variables needed to reconstruct each KPI. It combines hybrid retrieval, dependency-aware calculation, and deterministic validation to keep the outputs auditable and explainable.
 
 Repository: [GitHub](https://github.com/walid7shind/AeroKpi-Forge)
 
@@ -287,6 +295,48 @@ Paper: [AeroKpi report and technical write-up](/project%20assets/AeroKpi%20Forge
             "/project%20assets/AeroKpi%20Forge/diagrams/3-computation%20engine.png",
             "/project%20assets/AeroKpi%20Forge/diagrams/4-output.png",
           ],
+          details: {
+            "Development context": "Amadeus",
+            "Ownership": "Full ownership of design, implementation, evaluation, and operationalization",
+          },
+        },
+        {
+          slug: "data-quality",
+          title: "Data Quality",
+          description:
+            "Amadeus data-quality pipeline for the AlMatar dataset and reliability checks.",
+          overview: `
+**Data Quality** was developed at **Amadeus** as part of the Data Engineering team I was working with. I contributed to the design, implementation, and operational reliability of the **AlMatar dataset quality pipeline**, with a focus on completeness, consistency, and safe delivery.
+
+The pipeline ingests periodic updates from S3, discovers relevant files, filters by date, applies validation checks, and integrates with the team’s existing data-quality framework. It validates the incoming dataset for completeness, format and domain integrity, business consistency, and delivery control before the output is checked and routed toward production review.
+
+This project reflects team-based delivery within the broader Data Engineering function, while my main contribution was on the AlMatar pipeline and its operational guardrails.
+          `,
+          punchline:
+            "Reliable, observable data quality checks for the AlMatar data delivery pipeline.",
+          techStack: {
+            dataQuality: [
+              "S3 file discovery and date filtering",
+              "Schema and format validation",
+              "Deequ analyzers and constraints",
+              "Metrics and checks output",
+              "Jenkins-controlled execution",
+            ],
+            dataPlatform: [
+              "Spark",
+              "Scala",
+              "Deequ",
+              "Amazon S3",
+              "EMR",
+              "Jenkins",
+            ],
+          },
+          github: "https://github.com/walid7shind",
+          details: {
+            "Development context": "Amadeus Data Engineering team",
+            "Dataset focus": "AlMatar",
+            "Contribution": "Pipeline implementation, validation logic, and operational reliability work",
+          },
         },
         {
           slug: "lanesight",

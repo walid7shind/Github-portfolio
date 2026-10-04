@@ -479,6 +479,158 @@ export default function ProjectPageClient({ slug }: { slug: string }) {
     );
   }
 
+  if (project.slug === "data-quality") {
+    const dataQualitySteps = [
+      "S3 input",
+      "Discover",
+      "Validate",
+      "Spark / Deequ",
+      "Metrics + checks",
+      "Missing? Retry later",
+    ];
+
+    return (
+      <div className="bg-[#071a33] text-white">
+        <div className="mx-auto max-w-7xl px-4 py-12 md:px-8 lg:px-10">
+          <div className="mb-10 flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.2em] text-cyan-300/90">
+            <span>10 — Data Quality</span>
+          </div>
+
+          <h1 className="text-4xl font-semibold tracking-tight md:text-7xl">
+            <span className="text-cyan-300">[Air Rev]</span>
+            <span className="mx-4 text-slate-300">—</span>
+            <span className="text-white">Almatar Data Quality Pipeline</span>
+          </h1>
+
+          <p className="mt-7 max-w-6xl text-lg leading-relaxed text-slate-300 md:text-2xl">
+            Almatar delivers booking benchmark fares to S3 periodically. The campaign integrates that dataset into the team&apos;s existing Data Quality framework, which verifies automatically that incoming data is complete, consistent and usable.
+          </p>
+
+          <div className="mt-10 overflow-hidden rounded-xl border border-cyan-400/40 bg-[#050d1e] shadow-[0_0_0_1px_rgba(34,211,238,0.08)]">
+            <div className="grid gap-3 bg-[#070f1c] p-5 md:grid-cols-6 md:p-8">
+              <div className="flex min-h-[70px] items-center justify-center rounded-lg border border-cyan-400/40 bg-slate-900/40 px-4 text-center text-sm text-cyan-100 shadow-inner shadow-cyan-500/10">
+                CSV / Parquet / JSON
+              </div>
+              <div className="flex min-h-[70px] items-center justify-center rounded-lg border border-cyan-400/40 bg-slate-900/40 px-4 text-center text-sm text-cyan-100">
+                File discovery and date filtering
+              </div>
+              <div className="flex min-h-[70px] items-center justify-center rounded-lg border border-cyan-400/40 bg-slate-900/40 px-4 text-center text-sm text-cyan-100">
+                Deequ analyzers
+              </div>
+              <div className="flex min-h-[70px] items-center justify-center rounded-lg border border-cyan-400/40 bg-slate-900/40 px-4 text-center text-sm text-cyan-100">
+                Metrics output
+              </div>
+              <div className="flex min-h-[70px] items-center justify-center rounded-lg border border-cyan-400/40 bg-slate-900/40 px-4 text-center text-sm text-cyan-100">
+                DQFailureEmailApp
+              </div>
+              <div className="flex min-h-[70px] items-center justify-center rounded-lg border border-cyan-400/40 bg-slate-900/40 px-4 text-center text-sm text-cyan-100">
+                YAML configuration
+              </div>
+              <div className="flex min-h-[70px] items-center justify-center rounded-lg border border-cyan-400/40 bg-slate-900/40 px-4 text-center text-sm text-cyan-100">
+                DataQualityApp
+              </div>
+              <div className="flex min-h-[70px] items-center justify-center rounded-lg border border-cyan-400/40 bg-slate-900/40 px-4 text-center text-sm text-cyan-100">
+                Spark DataFrame
+              </div>
+              <div className="flex min-h-[70px] items-center justify-center rounded-lg border border-cyan-400/40 bg-slate-900/40 px-4 text-center text-sm text-cyan-100">
+                Deequ constraints
+              </div>
+              <div className="flex min-h-[70px] items-center justify-center rounded-lg border border-cyan-400/40 bg-slate-900/40 px-4 text-center text-sm text-cyan-100">
+                Checks output
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 grid gap-5 border-t border-slate-700 pt-6 md:grid-cols-4">
+            <div>
+              <div className="text-[11px] font-medium uppercase tracking-[0.2em] text-cyan-300">Completeness</div>
+              <div className="mt-2 text-2xl font-semibold text-white">Critical fields ≈ 98%</div>
+            </div>
+            <div>
+              <div className="text-[11px] font-medium uppercase tracking-[0.2em] text-cyan-300">Format &amp; domain</div>
+              <div className="mt-2 text-2xl font-semibold text-white">Dates, airports, airlines, cabins</div>
+            </div>
+            <div>
+              <div className="text-[11px] font-medium uppercase tracking-[0.2em] text-cyan-300">Business consistency</div>
+              <div className="mt-2 text-2xl font-semibold text-white">Non-negative durations and values</div>
+            </div>
+            <div>
+              <div className="text-[11px] font-medium uppercase tracking-[0.2em] text-cyan-300">Delivery control</div>
+              <div className="mt-2 text-2xl font-semibold text-white">Expected files; missing or late tracked</div>
+            </div>
+          </div>
+
+          <div className="mt-10 rounded-xl border border-cyan-400/50 bg-[#0b1733] p-5 md:p-8">
+            <div className="flex items-center gap-4 text-sm uppercase tracking-[0.2em] text-cyan-300">
+              <span className="inline-flex rounded border border-cyan-400/50 px-2 py-1">Status</span>
+              <span className="text-lg font-medium text-white">The Almatar campaign is under review as a pull request and runs successfully on the Jenkins test environment, with the output checked — awaiting approval to be deployed to production.</span>
+            </div>
+          </div>
+
+          <div className="mt-10 flex flex-col gap-2 border-t border-slate-700 pt-6 text-slate-300 md:flex-row md:items-end md:justify-between">
+            <div className="text-3xl font-semibold tracking-tight text-white">aMaDeus</div>
+            <div className="text-sm uppercase tracking-[0.18em] text-cyan-300">Spark · Scala · Deequ · S3 · EMR · Jenkins</div>
+            <div className="text-xs uppercase tracking-[0.2em] text-orange-300">Confidential</div>
+          </div>
+
+          <div className="mt-14 border-t border-slate-700 pt-10">
+            <div className="mb-8 flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.2em] text-cyan-300/90">
+              <span>11 — Reliability</span>
+            </div>
+
+            <h2 className="text-4xl font-semibold tracking-tight text-white md:text-7xl">
+              <span className="text-cyan-300">[Air Rev]</span>
+              <span className="mx-4 text-slate-300">—</span>
+              <span className="text-white">What it took to make it reliable to run</span>
+            </h2>
+
+            <div className="mt-10 grid gap-6 md:grid-cols-2">
+              <div className="rounded-xl border border-slate-700 bg-[#0a1530] p-6">
+                <div className="text-2xl font-medium text-cyan-300">01</div>
+                <h3 className="mt-4 text-3xl font-semibold text-white">Missing or late files</h3>
+                <p className="mt-4 text-lg text-slate-300">A dataset may not arrive when expected.</p>
+                <p className="mt-3 text-lg text-slate-300">Missed dates are persisted and retried automatically.</p>
+              </div>
+
+              <div className="rounded-xl border border-slate-700 bg-[#0a1530] p-6">
+                <div className="text-2xl font-medium text-cyan-300">02</div>
+                <h3 className="mt-4 text-3xl font-semibold text-white">Mixed files in one location</h3>
+                <p className="mt-4 text-lg text-slate-300">The S3 path can hold other feeds.</p>
+                <p className="mt-3 text-lg text-slate-300">Strict filename discovery — contributed back to the shared framework.</p>
+              </div>
+
+              <div className="rounded-xl border border-slate-700 bg-[#0a1530] p-6">
+                <div className="text-2xl font-medium text-cyan-300">03</div>
+                <h3 className="mt-4 text-3xl font-semibold text-white">Automated execution</h3>
+                <p className="mt-4 text-lg text-slate-300">The pipeline needs to run automatically.</p>
+                <p className="mt-3 text-lg text-slate-300">Shell script prepares the run and launches the Data Quality job.</p>
+              </div>
+
+              <div className="rounded-xl border border-slate-700 bg-[#0a1530] p-6">
+                <div className="text-2xl font-medium text-cyan-300">04</div>
+                <h3 className="mt-4 text-3xl font-semibold text-white">End-to-end testing</h3>
+                <p className="mt-4 text-lg text-slate-300">Changes must work with realistic Almatar data.</p>
+                <p className="mt-3 text-lg text-slate-300">Integration test validates the complete pipeline.</p>
+              </div>
+            </div>
+
+            <div className="mt-10 flex flex-wrap gap-3">
+              {dataQualitySteps.map((step) => (
+                <span key={step} className="inline-flex items-center rounded-lg border border-cyan-400/50 bg-[#0d1c39] px-4 py-2 text-base text-slate-200">
+                  {step}
+                </span>
+              ))}
+            </div>
+
+            <p className="mt-10 text-4xl font-semibold leading-tight text-white md:text-6xl">
+              Data quality is also about making delivery observable, recoverable and safe to operate — which is what makes Almatar ready to deploy.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* Full-width hero */}
